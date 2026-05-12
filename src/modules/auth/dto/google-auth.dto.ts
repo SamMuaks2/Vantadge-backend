@@ -1,0 +1,1 @@
+export { GoogleAuthDto } from "./index";
