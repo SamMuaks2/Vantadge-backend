@@ -6,6 +6,7 @@ import { User, UserDocument } from "./schemas/user.schema";
 
 @Injectable()
 export class UsersService {
+  firebaseService: any;
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findAll() {
@@ -22,6 +23,17 @@ export class UsersService {
     return this.userModel.findByIdAndUpdate(id, dto, { new: true }).select("-password");
   }
 
+  // async changePassword(id: string, currentPassword: string, newPassword: string) {
+  //   const user = await this.userModel.findById(id).select("+password");
+  //   if (!user || !user.password) throw new NotFoundException("User not found");
+  //   const valid = await bcrypt.compare(currentPassword, user.password);
+  //   if (!valid) throw new Error("Current password is incorrect");
+  //   user.password = await bcrypt.hash(newPassword, 12);
+  //   await user.save();
+  //   return { message: "Password updated" };
+  // }
+
+
   async changePassword(id: string, currentPassword: string, newPassword: string) {
     const user = await this.userModel.findById(id).select("+password");
     if (!user || !user.password) throw new NotFoundException("User not found");
@@ -29,6 +41,14 @@ export class UsersService {
     if (!valid) throw new Error("Current password is incorrect");
     user.password = await bcrypt.hash(newPassword, 12);
     await user.save();
+
+    // Sync to Firebase
+    if (user.firebaseUid) {
+      try {
+        await this.firebaseService.updatePassword(user.firebaseUid, newPassword);
+      } catch (err) { /* log but don't fail */ }
+    }
+
     return { message: "Password updated" };
   }
 }

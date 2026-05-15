@@ -21,6 +21,9 @@ export class User {
   googleId?: string;
 
   @Prop()
+  firebaseUid?: string;
+
+  @Prop()
   avatar?: string;
 
   @Prop({ default: "member", enum: ["member", "admin"] })

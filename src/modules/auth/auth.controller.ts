@@ -49,6 +49,14 @@ export class AuthController {
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.newPassword);
   }
+  
+  @Post("reset-password-by-email")
+  @ApiOperation({ summary: "Sync Firebase password reset to MongoDB (called after Firebase confirmPasswordReset)" })
+  resetPasswordByEmail(
+    @Body() body: { email: string; newPassword: string }
+  ) {
+    return this.authService.resetPasswordByEmail(body.email, body.newPassword);
+  }
 
   @Get("me")
   @ApiBearerAuth()
